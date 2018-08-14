@@ -60,13 +60,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlValue;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Source;
-
-import org.xml.sax.SAXException;
 
 import mekhq.MekHQ;
-import mekhq.MekHqXmlUtil;
 import mekhq.campaign.personnel.BodyLocation;
 import mekhq.gui.utilities.MultiplyComposite;
 
@@ -102,7 +97,7 @@ public class Paperdoll extends Component {
         try {
             loadShapeData(is);
         } catch(Exception ex) {
-            MekHQ.getLogger().error(getClass(), "<init>(InputStream)", ex);
+            MekHQ.getLogger().log(getClass(), "<init>(InputStream)", ex);
         }
         
         highlightColor = null;
@@ -110,13 +105,12 @@ public class Paperdoll extends Component {
         enableEvents(AWTEvent.MOUSE_EVENT_MASK | AWTEvent.MOUSE_MOTION_EVENT_MASK);
     }
     
-    public void loadShapeData(InputStream is) throws JAXBException, SAXException, ParserConfigurationException {
+    public void loadShapeData(InputStream is) throws JAXBException {
         final String METHOD_NAME = "loadShapeData(InputStream)"; //$NON-NLS-1$
         
         JAXBContext context = JAXBContext.newInstance(OverlayLocDataList.class, OverlayLocData.class);
         Unmarshaller unmarshaller = context.createUnmarshaller();
-        Source inputSource = MekHqXmlUtil.createSafeXmlSource(is);
-        OverlayLocDataList dataList = (OverlayLocDataList) unmarshaller.unmarshal(inputSource);
+        OverlayLocDataList dataList = (OverlayLocDataList) unmarshaller.unmarshal(is);
         if(null != dataList.locs) {
             dataList.locs.forEach(data -> {
                 locShapes.put(data.loc, data.genPath());
@@ -140,7 +134,7 @@ public class Paperdoll extends Component {
             try {
                 mt.waitForAll();
             } catch(InterruptedException iex) {
-                MekHQ.getLogger().error(getClass(), METHOD_NAME, iex);
+                MekHQ.getLogger().log(getClass(), METHOD_NAME, iex);
             }
         } else {
             base = new BufferedImage(DEFAULT_WIDTH, DEFAULT_HEIGHT, BufferedImage.TYPE_INT_ARGB);

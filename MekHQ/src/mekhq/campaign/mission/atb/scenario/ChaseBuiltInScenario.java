@@ -3,10 +3,8 @@ package mekhq.campaign.mission.atb.scenario;
 import java.util.ArrayList;
 
 import megamek.client.bot.princess.BehaviorSettingsFactory;
-import megamek.client.bot.princess.CardinalEdge;
 import megamek.client.bot.princess.PrincessException;
 import megamek.common.Board;
-import megamek.common.Compute;
 import megamek.common.Entity;
 import megamek.common.EntityWeightClass;
 import mekhq.campaign.Campaign;
@@ -50,18 +48,16 @@ public class ChaseBuiltInScenario extends AtBScenario {
 	@Override
 	public void setExtraMissionForces(Campaign campaign, ArrayList<Entity> allyEntities,
 			ArrayList<Entity> enemyEntities) {
-	    boolean startNorth = Compute.d6() > 3;
-	    
-	    int destinationEdge = startNorth ? Board.START_S : Board.START_N;
-	    int startEdge = startNorth ? Board.START_N : Board.START_S;
+		int enemyStart = Board.START_S;
+		int playerHome = Board.START_N;
 
-		setStart(startEdge);
-		setEnemyHome(destinationEdge);
+		setStart(Board.START_S);
+		setEnemyHome(Board.START_N);
 
 		BotForce allyEntitiesForce = null;
 
 		if (allyEntities.size() > 0) {
-			allyEntitiesForce = getAllyBotForce(getContract(campaign), getStart(), destinationEdge, allyEntities);
+			allyEntitiesForce = getAllyBotForce(getContract(campaign), getStart(), playerHome, allyEntities);
 			addBotForce(allyEntitiesForce);
 		}
 
@@ -70,19 +66,16 @@ public class ChaseBuiltInScenario extends AtBScenario {
 		addEnemyForce(enemyEntities, getLance(campaign).getWeightClass(campaign), EntityWeightClass.WEIGHT_ASSAULT, 0,
 				-1, campaign);
 
-		BotForce botForce = getEnemyBotForce(getContract(campaign), startEdge, getEnemyHome(), enemyEntities);
+		BotForce botForce = getEnemyBotForce(getContract(campaign), enemyStart, getEnemyHome(), enemyEntities);
 
 		try {
 			if (isAttacker()) {
 				if (null != allyEntitiesForce) {
 					allyEntitiesForce
 							.setBehaviorSettings(BehaviorSettingsFactory.getInstance().ESCAPE_BEHAVIOR.getCopy());
-					
-					allyEntitiesForce.setDestinationEdge(destinationEdge);
 				}
 			} else {
 				botForce.setBehaviorSettings(BehaviorSettingsFactory.getInstance().ESCAPE_BEHAVIOR.getCopy());
-				botForce.setDestinationEdge(destinationEdge);
 			}
 		} catch (PrincessException e) {
 			e.printStackTrace();

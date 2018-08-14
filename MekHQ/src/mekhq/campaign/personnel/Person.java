@@ -202,15 +202,6 @@ public class Person implements Serializable, MekHqXmlSerializable {
         = new ExtraData.IntKey("procreation:children");
     public static final ExtraData.StringKey PREGNANCY_FATHER_DATA
         = new ExtraData.StringKey("procreation:father");
-
-    /** Contains the skill levels to be displayed in a tech's description */
-    private static final String[] DISPLAYED_SKILL_LEVELS = new String[] {
-        SkillType.S_TECH_MECH,
-        SkillType.S_TECH_MECHANIC,
-        SkillType.S_TECH_BA,
-        SkillType.S_TECH_AERO,
-        SkillType.S_TECH_VESSEL,
-    };
     
     protected UUID id;
     protected int oldId;
@@ -3260,28 +3251,19 @@ public class Person implements Serializable, MekHqXmlSerializable {
     }
 
     public String getDocDesc() {
-        StringBuilder toReturn = new StringBuilder(128);
-        toReturn.append("<html><font size='2'><b>");
-        toReturn.append(getFullName());
-        toReturn.append(String.format("</b> (%d XP)<br/>", getXp()));
-
+        String toReturn = "<html><font size='2'><b>" + getFullName() + "</b><br/>";
         Skill skill = getSkill(SkillType.S_DOCTOR);
         if (null != skill) {
-            toReturn.append(SkillType.getExperienceLevelName(skill.getExperienceLevel()));
-            toReturn.append(" " + SkillType.S_DOCTOR);
+            toReturn += SkillType.getExperienceLevelName(skill.getExperienceLevel()) + " " + SkillType.S_DOCTOR;
         }
-
         if (campaign.getMedicsPerDoctor() < 4) {
-            toReturn.append("</font><font size='2' color='red'>, ");
-            toReturn.append(campaign.getMedicsPerDoctor());
-            toReturn.append(" medics</font><font size='2'><br/>");
+            toReturn += "</font><font size='2' color='red'>" + ", " + campaign.getMedicsPerDoctor() + " medics</font><font size='2'><br>";
         } else {
-            toReturn.append(String.format(", %d medics<br />", campaign.getMedicsPerDoctor()));
+            toReturn += ", " + campaign.getMedicsPerDoctor() + " medics<br>";
         }
-        
-        toReturn.append(String.format("%d patient(s)</font></html>", campaign.getPatientsFor(this)));
-
-        return toReturn.toString();
+        toReturn += campaign.getPatientsFor(this) + " patient(s)";
+        toReturn += "</font></html>";
+        return toReturn;
     }
 
     public int getBestTechLevel() {
@@ -3310,39 +3292,58 @@ public class Person implements Serializable, MekHqXmlSerializable {
     }
 
     public String getTechDesc(boolean overtimeAllowed, IPartWork part) {
-        StringBuilder toReturn = new StringBuilder(128);
-        toReturn.append("<html><font size='2'");
+        String toReturn = "<html><font size='2'><b>" + getFullName() + "</b><br/>";
         if (null != part && null != part.getUnit() && getTechUnitIDs().contains(part.getUnit().getId())) {
-            toReturn.append(" color='green'><b>@");
+            toReturn = "<html><font size='2' color='green'><b>@" + getFullName() + "</b><br/>";
         }
-        else {
-            toReturn.append("><b>");
-        }
-        toReturn.append(getFullName());
-        toReturn.append(String.format("</b> (%d XP)<br/>", getXp()));
-
+        Skill mechSkill = getSkill(SkillType.S_TECH_MECH);
+        Skill mechanicSkill = getSkill(SkillType.S_TECH_MECHANIC);
+        Skill baSkill = getSkill(SkillType.S_TECH_BA);
+        Skill aeroSkill = getSkill(SkillType.S_TECH_AERO);
+        Skill vesselSkill = getSkill(SkillType.S_TECH_VESSEL);
         boolean first = true;
-        for (String skillName : DISPLAYED_SKILL_LEVELS) {
-            Skill skill = getSkill(skillName);
-            if (null == skill) {
-                continue;
+        if (null != mechSkill) {
+            if (!first) {
+                toReturn += "; ";
             }
-            else if (!first) {
-                toReturn.append("; ");
-            }
-            
-            toReturn.append(SkillType.getExperienceLevelName(skill.getExperienceLevel()));
-            toReturn.append(" " + skillName);
+            toReturn += SkillType.getExperienceLevelName(mechSkill.getExperienceLevel()) + " " + SkillType.S_TECH_MECH;
             first = false;
         }
-
-        toReturn.append("<br/>");
-        toReturn.append(String.format("%d minutes left", getMinutesLeft()));
-        if (overtimeAllowed) {
-            toReturn.append(String.format(" + (%d overtime)", getOvertimeLeft()));
+        if (null != mechanicSkill) {
+            if (!first) {
+                toReturn += "; ";
+            }
+            toReturn += SkillType.getExperienceLevelName(mechanicSkill.getExperienceLevel()) + " " + SkillType.S_TECH_MECHANIC;
+            first = false;
         }
-        toReturn.append("</font></html>");
-        return toReturn.toString();
+        if (null != baSkill) {
+            if (!first) {
+                toReturn += "; ";
+            }
+            toReturn += SkillType.getExperienceLevelName(baSkill.getExperienceLevel()) + " " + SkillType.S_TECH_BA;
+            first = false;
+        }
+        if (null != aeroSkill) {
+            if (!first) {
+                toReturn += "; ";
+            }
+            toReturn += SkillType.getExperienceLevelName(aeroSkill.getExperienceLevel()) + " " + SkillType.S_TECH_AERO;
+            first = false;
+        }
+        if (null != vesselSkill) {
+            if (!first) {
+                toReturn += "; ";
+            }
+            toReturn += SkillType.getExperienceLevelName(vesselSkill.getExperienceLevel()) + " " + SkillType.S_TECH_VESSEL;
+            first = false;
+        }
+        toReturn += "<br/>";
+        toReturn += getMinutesLeft() + " minutes left";
+        if (overtimeAllowed) {
+            toReturn += " + (" + getOvertimeLeft() + " overtime)";
+        }
+        toReturn += "</font></html>";
+        return toReturn;
     }
 
     public boolean isRightTechTypeFor(IPartWork part) {

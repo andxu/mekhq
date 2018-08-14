@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -41,7 +42,6 @@ import megamek.common.Compute;
 import megamek.common.annotations.Nullable;
 import megamek.common.logging.LogLevel;
 import mekhq.MekHQ;
-import mekhq.MekHqXmlUtil;
 
 /**
  * @author Neoancient
@@ -457,10 +457,11 @@ public class Bloodname implements Serializable {
 			return;
 		}
 
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		Document doc = null;
 
 		try {
-			DocumentBuilder db = MekHqXmlUtil.newSafeDocumentBuilder();
+			DocumentBuilder db = dbf.newDocumentBuilder();
 			doc = db.parse(fis);
 		} catch (Exception ex) {
 			System.err.println(ex.getMessage());
@@ -613,10 +614,11 @@ class Clan {
 			return;
 		}
 
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		Document doc = null;
 
 		try {
-			DocumentBuilder db = MekHqXmlUtil.newSafeDocumentBuilder();
+			DocumentBuilder db = dbf.newDocumentBuilder();
 			doc = db.parse(fis);
 		} catch (Exception ex) {
 			System.err.println(ex.getMessage());

@@ -55,6 +55,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.swing.JOptionPane;
 import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.joda.time.DateTime;
 import org.w3c.dom.DOMException;
@@ -3745,12 +3746,12 @@ public class Campaign implements Serializable, ITechManager {
         // Initialize variables.
         Campaign retVal = new Campaign();
         retVal.app = app;
-
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         Document xmlDoc = null;
 
         try {
             // Using factory get an instance of document builder
-            DocumentBuilder db = MekHqXmlUtil.newSafeDocumentBuilder();
+            DocumentBuilder db = dbf.newDocumentBuilder();
 
             // Parse using builder to get DOM representation of the XML file
             xmlDoc = db.parse(fis);
@@ -4259,8 +4260,8 @@ public class Campaign implements Serializable, ITechManager {
         timestamp = System.currentTimeMillis();
 
         // ok, once we are sure that campaign has been set for all units, we can
-        // now go through and initializeParts and run diagnostics
-        List<Unit> removeUnits = new ArrayList<>();
+        // now go
+        // through and initializeParts and run diagnostics
         for (Unit unit : retVal.getUnits()) {
             // just in case parts are missing (i.e. because they weren't tracked
             // in previous versions)            
@@ -4270,14 +4271,11 @@ public class Campaign implements Serializable, ITechManager {
                 if (!unit.hasSalvageableParts()) {
                     // we shouldnt get here but some units seem to stick around
                     // for some reason
-                    removeUnits.add(unit);
+                    retVal.removeUnit(unit.getId());
                 } else {
                     unit.setSalvage(true);
                 }
             }
-        }
-        for (Unit unit : removeUnits) {
-            retVal.removeUnit(unit.getId());
         }
 
         MekHQ.getLogger().log(Campaign.class, METHOD_NAME, LogLevel.INFO,

@@ -20,17 +20,15 @@
 package mekhq.campaign.personnel;
 
 import mekhq.MekHQ;
-import mekhq.MekHqXmlUtil;
 import mekhq.campaign.AwardSet;
 import mekhq.campaign.LogEntry;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -125,7 +123,7 @@ public class AwardsFactory {
             }
         } catch (Exception ex) {
             // Doh!
-            MekHQ.getLogger().error(LogEntry.class, METHOD_NAME, ex);
+            MekHQ.getLogger().log(LogEntry.class, METHOD_NAME, ex);
         }
 
         return generateNew(set, name, date);
@@ -151,7 +149,7 @@ public class AwardsFactory {
                 JAXBContext jaxbContext = JAXBContext.newInstance(AwardSet.class, Award.class);
                 Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
 
-                awardSet = unmarshaller.unmarshal(MekHqXmlUtil.createSafeXmlSource(inputStream), AwardSet.class).getValue();
+                awardSet = unmarshaller.unmarshal(new StreamSource(inputStream), AwardSet.class).getValue();
 
                 Map<String, Award> tempAwardMap = new HashMap<>();
                 String currentSetName = file.getName().replaceFirst("[.][^.]+$", "");
@@ -160,12 +158,12 @@ public class AwardsFactory {
                     tempAwardMap.put(award.getName(), award);
                 }
                 awardsMap.put(currentSetName, tempAwardMap);
-            } catch (SAXException | ParserConfigurationException e) {
-                MekHQ.getLogger().error(AwardsFactory.class, "loadAwards", e);
+
+            } catch (JAXBException var4) {
+                System.err.println("Error loading XML for awards: " + var4.getMessage());
+                var4.printStackTrace();
             } catch (FileNotFoundException e) {
-                MekHQ.getLogger().error(AwardsFactory.class, "loadAwards", "Cannot find XML awards file: " + file.getName(), e);
-            } catch (JAXBException | IOException e) {
-                MekHQ.getLogger().error(AwardsFactory.class, "loadAwards", "Error loading XML for awards", e);
+                e.printStackTrace();
             }
         }
     }
