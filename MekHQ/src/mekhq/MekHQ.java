@@ -249,7 +249,13 @@ public class MekHQ implements GameListener {
     /**
      * Main method launching the application.
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
+		new test.Foo().bar(1,2, i-> {
+			for (int j = 0; j < 100; j++) {
+				System.out.println(i+j);	
+			}
+            System.out.println(i+10);
+        });
     	System.setProperty("apple.laf.useScreenMenuBar", "true");
         System.setProperty("com.apple.mrj.application.apple.menu.about.name","MekHQ");
         //redirect output to log file
